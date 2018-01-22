@@ -11,9 +11,10 @@ namespace HopefieldSimulator
             //  -1      0       2
             //  -3      2       0
             var matrixFromTextExample = new Matrix(new double[,] { { 0, -1, -3 }, { -1, 0, 2 }, { -3, 2, 0 } });
-            
-            HopefieldNetwork network = new HopefieldNetwork(matrixFromTextExample);
 
+            OutputRenderer.OutputInputMatrix3x3(matrixFromTextExample);
+
+            HopefieldNetwork network = new HopefieldNetwork(matrixFromTextExample);
             network.StudyAllVectorsSync();
             network.StudyAllVectorsAsync();
 

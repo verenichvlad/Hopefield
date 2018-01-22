@@ -9,6 +9,8 @@ namespace HopefieldSimulator
     {
         public static StreamWriter streamWriter { get; set; }
 
+        private static int studyCounter = 1;
+
         static OutputRenderer()
         {
             streamWriter = new StreamWriter("HopefieldStudyResults.txt");
@@ -17,6 +19,20 @@ namespace HopefieldSimulator
         public static void CloseWriter()
         {
             streamWriter.Close();
+        }
+
+        public static void OutputInputMatrix3x3(Matrix matrix)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("Input matrix 3x3:");
+            for (int i = 0; i < 3; i++)
+                stringBuilder.AppendLine(string.Format("{0}\t{1}\t{2}", 
+                    matrix.GetElement(i, 0), 
+                    matrix.GetElement(i, 1), 
+                    matrix.GetElement(i, 2)));
+            stringBuilder.AppendLine();
+
+            PushToOutput(stringBuilder);
         }
 
         public static void OutputModeHeader(string mode)
@@ -28,20 +44,21 @@ namespace HopefieldSimulator
             stringBuilder.AppendLine("///////////////////////////////////");
             stringBuilder.AppendLine();
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
         }
 
         public static void OutputStudyHeader(Matrix vector)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
+            stringBuilder.AppendLine(string.Format("+++++++++++++++ Study nr: {0} +++++++++++++++++", studyCounter));
             stringBuilder.AppendLine("Moving to following vector: ############################");
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
 
             OutputVectorWithEmptyLine(vector);
+
+            studyCounter++;
         }
 
         public static void OutputCurrentStepHeader(int step)
@@ -51,8 +68,7 @@ namespace HopefieldSimulator
             stringBuilder.AppendLine(string.Format("Step nr {0} --------------", step));
             stringBuilder.AppendLine();
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
         }
 
         public static void OutputInputPotentialAsync(double value, int position)
@@ -81,8 +97,18 @@ namespace HopefieldSimulator
             }
             stringBuilder.AppendLine();
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
+        }
+
+        public static void OutputInputPotentialSync(Matrix vector)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine("Input potential: ");
+
+            PushToOutput(stringBuilder);
+
+            OutputVectorWithEmptyLine(vector);
         }
 
         public static void OutputOutputPotential(Matrix outputPotentialVector)
@@ -91,8 +117,7 @@ namespace HopefieldSimulator
 
             stringBuilder.AppendLine("Output potential: ");
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
 
             OutputVectorWithEmptyLine(outputPotentialVector);
         }
@@ -104,11 +129,10 @@ namespace HopefieldSimulator
             stringBuilder.AppendLine(string.Format("Energy = {0}", value));
             stringBuilder.AppendLine();
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
         }
 
-        public static void OutputIterationStreak(int streak)
+        public static void OutputIterationStreakAsync(int streak)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -118,8 +142,17 @@ namespace HopefieldSimulator
 
             stringBuilder.AppendLine();
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
+        }
+
+        public static void OutputIterationStreakSync(Matrix resultVector)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine("--> Network become stable! <--");
+
+            PushToOutput(stringBuilder);
+            OutputVectorWithEmptyLine(resultVector);
         }
 
         public static void OutputResultVector(Matrix resultVector)
@@ -128,10 +161,28 @@ namespace HopefieldSimulator
 
             stringBuilder.AppendLine(string.Format("Result vector (V2): "));
 
-            Console.WriteLine(stringBuilder);
-            streamWriter.WriteLine(stringBuilder);
+            PushToOutput(stringBuilder);
 
             OutputVectorWithEmptyLine(resultVector);
+        }
+
+        public static void OutputOscillationResult(Matrix V1, Matrix V2)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine("Reached 2-point oscillation!");
+            stringBuilder.AppendLine("V1:");
+
+            PushToOutput(stringBuilder);
+
+            OutputVectorWithEmptyLine(V1);
+
+            stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("V2:");
+
+            PushToOutput(stringBuilder);
+
+            OutputVectorWithEmptyLine(V2);
         }
 
         public static void OutputVectorWithEmptyLine(Matrix vector)
@@ -144,6 +195,11 @@ namespace HopefieldSimulator
 
             stringBuilder.AppendLine();
 
+            PushToOutput(stringBuilder);
+        }
+
+        private static void PushToOutput(StringBuilder stringBuilder)
+        {
             Console.WriteLine(stringBuilder);
             streamWriter.WriteLine(stringBuilder);
         }

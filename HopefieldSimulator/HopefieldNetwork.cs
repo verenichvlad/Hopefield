@@ -35,34 +35,42 @@ namespace HopefieldSimulator
         {
             OutputRenderer.OutputModeHeader("synchronous");
 
-            foreach (Matrix vector in AllVectors)
+            foreach (Matrix studiedVector in AllVectors)
             {
-                // Clone so we wont mutate original input data
-                var previousStepVector = vector.Clone();
+                OutputRenderer.OutputStudyHeader(studiedVector);
+
+                var previousStepOutputPotential = studiedVector.Clone();
                 double previousStepEnergy = -99999;
 
-                var currentStepVector = vector.Clone();
+                var outputPotential = studiedVector.Clone();
 
                 // Perform study steps
                 for (int currentStepN = 1; currentStepN <= maxStepsSync; currentStepN++)
                 {
-                    currentStepVector = Matrix.Multiply(Matrix, previousStepVector).ToBiPolar();
+                    Matrix inputPotential = Matrix.Multiply(Matrix, previousStepOutputPotential);
+                    outputPotential = inputPotential.ToBiPolar();
 
-                    double energy = getEnergySyncOnly(previousStepVector, currentStepVector);
+                    double energy = getEnergySyncOnly(previousStepOutputPotential, outputPotential);
 
+                    OutputRenderer.OutputCurrentStepHeader(currentStepN);
+                    OutputRenderer.OutputInputPotentialSync(inputPotential);
+                    OutputRenderer.OutputOutputPotential(outputPotential);
+                    OutputRenderer.OutputEnergy(energy);
                     if (currentStepN > 1)
                     {
-                        bool isStable = currentStepVector.Equals(previousStepVector);
+                        bool isStable = outputPotential.Equals(previousStepOutputPotential);
                         bool energiesAreEqual = previousStepEnergy == energy;
 
-                        if (isStable) Console.WriteLine("Siec się ustablizowała / punkt stały");
-                        if (energiesAreEqual) Console.WriteLine("Oscylacja dwupunktowa");
+                        if (isStable)
+                            OutputRenderer.OutputIterationStreakSync(outputPotential);
+                        if (!isStable && energiesAreEqual)
+                            OutputRenderer.OutputOscillationResult(previousStepOutputPotential, outputPotential);
 
                         if (isStable || energiesAreEqual) break;
                     }
 
                     previousStepEnergy = energy;
-                    previousStepVector = currentStepVector;
+                    previousStepOutputPotential = outputPotential;
                 }
             }
         }
@@ -81,7 +89,6 @@ namespace HopefieldSimulator
                 // Perform study steps
                 for (int currentStepN = 1; currentStepN < maxStepsAsync; currentStepN++)
                 {
-                    //  Study
                     Matrix multipliedVector = Matrix.Multiply(Matrix, previousOutputPotentialVector);
 
                     double inputPotentialNeuronValue = multipliedVector.GetElement(studiedNeuronPosition, 0);
@@ -99,7 +106,7 @@ namespace HopefieldSimulator
                     OutputRenderer.OutputInputPotentialAsync(inputPotentialNeuronValue, studiedNeuronPosition);
                     OutputRenderer.OutputOutputPotential(outputPotentialVector);
                     OutputRenderer.OutputEnergy(energy);
-                    OutputRenderer.OutputIterationStreak(stableIterationsStreak);
+                    OutputRenderer.OutputIterationStreakAsync(stableIterationsStreak);
 
                     if (stableIterationsStreak >= 3)
                     {
